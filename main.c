@@ -24,6 +24,7 @@ void display_ethernet_header(struct ethhdr *eth);
 void display_ip_packet(struct iphdr *ip, struct sockaddr_in source, struct sockaddr_in dest);
 void display_udp_header(struct udphdr *udp);
 void display_tcp_header(struct tcphdr *tcp);
+void display_udp_payload (unsigned char *data, int remaining_data );
 
 
 // Function to get interface ip
@@ -96,6 +97,25 @@ void display_tcp_payload (unsigned char *data, int remaining_data, int srcport, 
 	}
 }
 
+void display_udp_header(struct udphdr *udp) {	
+	printf("\n-------UDP HEADER--------------\n");
+	printf("\t|-Source Port : %d\n", ntohs(udp->source));
+	printf("\t|-Destination Port : %d\n", ntohs(udp->dest));
+	printf("\t|-UDP Length : %d\n", ntohs(udp->len));
+	printf("\t|-UDP Checksum : %d\n", ntohs(udp->check));
+}
+
+
+void display_udp_payload (unsigned char *data, int remaining_data ) {
+
+	printf("\n-------UDP PAYLOAD--------------\n");
+	for(int i=0;i<remaining_data;i++) {
+		if (i != 0 && i % 16 == 0)
+			printf("\n");
+    printf(" %.2X ", data[i]);
+	
+	}
+}
 void packet_capture(const char *interface, int len) {
 	int sock;
 	// creating a raw socket
@@ -158,6 +178,20 @@ void packet_capture(const char *interface, int len) {
 			printf("data = %p\n",data);
 			display_tcp_payload(data, remaining_data, ntohs(tcp->source), ntohs(tcp->dest));
 		}
+		// In ip packet if the value of protocol field is 17 then it's a udp packet
+		if(ip->protocol == 17) {
+				display_ethernet_header(eth);
+				display_ip_packet(ip, source, dest);
+				printf("\n*******************Displayig UDP headers*****************************************\n");
+				struct udphdr *udp=(struct udphdr*)(buffer + iphdrlen + sizeof(struct ethhdr));	
+				data = (buffer + iphdrlen + sizeof(struct ethhdr) + sizeof(struct udphdr));
+				remaining_data = buflen - (iphdrlen + sizeof(struct ethhdr) + sizeof(struct udphdr));
+				display_udp_header(udp);
+				display_udp_payload(data, remaining_data);
+
+		}
+
+
 		// clearing the buffer
 		memset(buffer, 0, BUFFSIZE);
 		close(sock);
