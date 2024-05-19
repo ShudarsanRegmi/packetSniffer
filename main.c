@@ -144,16 +144,20 @@ void packet_capture(const char *interface, int len) {
 
 		int remaining_data;
 		unsigned char *data;
-
-		display_ethernet_header(eth);
-		display_ip_packet(ip, source, dest);
-		struct tcphdr *tcp= (struct tcphdr*)(buffer + iphdrlen + sizeof(struct ethhdr));	
-		display_tcp_header(tcp);
-		data = (buffer + iphdrlen + sizeof(struct ethhdr) + sizeof(struct tcphdr));
-		remaining_data = buflen - (iphdrlen + sizeof(struct ethhdr) + sizeof(struct tcphdr));
-		printf("data = %p\n",data);
-		display_tcp_payload(data, remaining_data, ntohs(tcp->source), ntohs(tcp->dest));
-
+	
+		// In ip packet if the protocol value is 6 then it's a tcp packet
+		if(ip->protocol == 6) {
+			display_ethernet_header(eth);
+			display_ip_packet(ip, source, dest);
+			printf("\n*******************Displaying TCP headers*****************************************\n");
+			struct tcphdr *tcp= (struct tcphdr*)(buffer + iphdrlen + sizeof(struct ethhdr));	
+			display_tcp_header(tcp);
+			data = (buffer + iphdrlen + sizeof(struct ethhdr) + sizeof(struct tcphdr));
+			remaining_data = buflen - (iphdrlen + sizeof(struct ethhdr) + sizeof(struct tcphdr));
+			printf("remaining data = %d\n", remaining_data);
+			printf("data = %p\n",data);
+			display_tcp_payload(data, remaining_data, ntohs(tcp->source), ntohs(tcp->dest));
+		}
 		// clearing the buffer
 		memset(buffer, 0, BUFFSIZE);
 		close(sock);
@@ -174,7 +178,7 @@ int main() {
 	
 	struct sockaddr_in localip;
 	get_interface_ip(&localip, interface);
-printf("IP address of interface %s is %s", interface, inet_ntoa(localip.sin_addr));
+	printf("IP address of interface %s is %s", interface, inet_ntoa(localip.sin_addr));
 
 	packet_capture(interface, len);	 // calling packet capture from main
 	return 0;
