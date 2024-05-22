@@ -146,7 +146,7 @@ void packet_capture(const char *interface, int len) {
 
 	int buflen; 
 
-	/* while(1) { */
+	while(1) { // infinite loop for packet capturing
 		buflen = recvfrom(sock,buffer, BUFFSIZE, 0, &saddr, (socklen_t *)&saddr_len); // capturing the packet
 		if(buflen == -1)
 			perror("Failed to receive the packet: ");
@@ -203,7 +203,7 @@ void packet_capture(const char *interface, int len) {
 		memset(buffer, 0, BUFFSIZE);
 		close(sock);
 		
-	/* } */
+	}
 }
 
 int main() {
