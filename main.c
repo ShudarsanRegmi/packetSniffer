@@ -178,8 +178,9 @@ void packet_capture(const char *interface, int len) {
 			printf("data = %p\n",data);
 			display_tcp_payload(data, remaining_data, ntohs(tcp->source), ntohs(tcp->dest));
 		}
+
 		// In ip packet if the value of protocol field is 17 then it's a udp packet
-		if(ip->protocol == 17) {
+		else if(ip->protocol == 17) {
 				display_ethernet_header(eth);
 				display_ip_packet(ip, source, dest);
 				printf("\n*******************Displayig UDP headers*****************************************\n");
@@ -189,6 +190,12 @@ void packet_capture(const char *interface, int len) {
 				display_udp_header(udp);
 				display_udp_payload(data, remaining_data);
 
+		}
+		// displaying other lower level packets (arp,rarp,etc)
+		else{
+			printf("Displaying other packet details");
+			display_ethernet_header(eth);
+			display_ip_packet(ip, source, dest);
 		}
 
 
