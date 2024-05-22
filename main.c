@@ -88,52 +88,75 @@ int validateIPAddress(char *ip_address) {
     regfree(&ipv6_regex);
     return 0;
 }
-// function to display ethernet header
 void display_ethernet_header(struct ethhdr *eth) {
-	printf("\n-------ETHERNET HEADER--------------\n");
-	printf("\t|-Source Address : %.2X-%.2X-%.2X-%.2X-%.2X-%.2X\n", eth->h_source[0], eth->h_source[1], eth->h_source[2], eth->h_source[3], eth->h_source[4], eth->h_source[5]);
-	printf("\t|-Destination Address : %.2X-%.2X-%.2X-%.2X-%.2X-%.2X\n", eth->h_dest[0], eth->h_dest[1], eth->h_dest[2], eth->h_dest[3], eth->h_dest[4], eth->h_dest[5]);
-	printf("\t|-Protocol : %d\n", eth->h_proto);
+    // Visual delimiter to separate current packet from the previous one
+    printf("\n🔻🔻🔻🔻🔻🔻🔻🔻🔻🔻🔻🔻🔻🔻🔻🔻🔻🔻🔻🔻🔻🔻🔻🔻\n");
+    // Display the Ethernet header information
+    printf("🌐 Ethernet Header 🌐\n");
+    printf("--------------------------------------------------\n");
+    printf("🔸 Source MAC Address      : %02X-%02X-%02X-%02X-%02X-%02X\n",
+           eth->h_source[0], eth->h_source[1], eth->h_source[2],
+           eth->h_source[3], eth->h_source[4], eth->h_source[5]);
+    printf("🔸 Destination MAC Address : %02X-%02X-%02X-%02X-%02X-%02X\n",
+           eth->h_dest[0], eth->h_dest[1], eth->h_dest[2],
+           eth->h_dest[3], eth->h_dest[4], eth->h_dest[5]);
+    printf("🔸 Protocol                : 0x%04X\n", ntohs(eth->h_proto));
+    printf("--------------------------------------------------\n");
+
 }
 
 
-void display_ip_packet(struct iphdr *ip,struct sockaddr_in source, struct sockaddr_in dest) {
-	printf("\n-------IP HEADER--------------\n");
-	source.sin_addr.s_addr = ip->saddr;	
-	dest.sin_addr.s_addr = ip->daddr;	
-	printf("\t|-Version: %d\n", (unsigned int)ip->version);
-	printf("\t|-Internet Header Length : %d DWORDS or %d Bytes\n", (unsigned int)ip->ihl, ((unsigned int)(ip->ihl)) * 4);
-	printf("\t|-Type of Service: %d\n", (unsigned int)ip->tos);
-	printf("\t|-Total Length: %d\n", (unsigned int)ip->tos);
-	printf("\t|-Total Length : %d Bytes\n", ntohs(ip->tot_len));
-	printf("\t|-Identification : %d\n", ntohs(ip->id));
-	printf("\t|-Time To Live : %d\n", (unsigned int)ip->ttl);
-	printf("\t|-Protocol : %d\n", (unsigned int)ip->protocol);
-	printf("\t|-Header Checksum : %d\n", ntohs(ip->check));
-	printf("\t|-Source IP : %s\n", inet_ntoa(source.sin_addr));
-	printf("\t|-Destination IP : %s\n", inet_ntoa(dest.sin_addr));
+
+void display_ip_packet(struct iphdr *ip, struct sockaddr_in source, struct sockaddr_in dest) {
+    // Populate the source and destination addresses
+    source.sin_addr.s_addr = ip->saddr;
+    dest.sin_addr.s_addr = ip->daddr;
+
+    // Display the IP header information
+    printf("\n🔵🔷🔹 IP Packet Overview 🔹🔷🔵\n");
+    printf("==============================================\n");
+    printf("🔸 Version               : %d\n", (unsigned int)ip->version);
+    printf("🔸 Header Length         : %d DWORDS (%d Bytes)\n", (unsigned int)ip->ihl, ((unsigned int)(ip->ihl)) * 4);
+    printf("🔸 Type of Service       : %d\n", (unsigned int)ip->tos);
+    printf("🔸 Total Length          : %d Bytes\n", ntohs(ip->tot_len));
+    printf("🔸 Identification        : %d\n", ntohs(ip->id));
+    printf("🔸 Time To Live (TTL)    : %d\n", (unsigned int)ip->ttl);
+    printf("🔸 Protocol              : %d\n", (unsigned int)ip->protocol);
+    printf("🔸 Header Checksum       : 0x%04X\n", ntohs(ip->check));
+    printf("==============================================\n");
+
+    // Display the source and destination IP addresses
+    printf("🌍 Source IP Address      : %s\n", inet_ntoa(source.sin_addr));
+    printf("🌍 Destination IP Address : %s\n", inet_ntoa(dest.sin_addr));
+    printf("==============================================\n");
+    printf("✨ End of IP Packet Overview ✨\n");
 }
 
+void display_tcp_header(struct tcphdr *tcp) {
+    printf("\n🌐 TCP Header Information 🌐\n");
+    printf("--------------------------------------------------\n");
+    printf("🔹 Source Port        : %u\n", ntohs(tcp->source));
+    printf("🔹 Destination Port   : %u\n", ntohs(tcp->dest));
+    printf("🔹 Sequence Number    : %u\n", ntohl(tcp->seq));
+    printf("🔹 Acknowledge Number : %u\n", ntohl(tcp->ack_seq));
+    printf("🔹 Header Length      : %d DWORDS (%d BYTES)\n", (unsigned int)tcp->doff, (unsigned int)tcp->doff * 4);
 
-void display_tcp_header (struct tcphdr *tcp) {	
-	printf("\n----------TCP Header-----------\n");
-	printf("\t|-Source Port        : %u\n", ntohs(tcp->source));
-	printf("\t|-Destination Port   : %u\n", ntohs(tcp->dest));
-	printf("\t|-Sequence Number   : %u\n", ntohl(tcp->seq));
-	printf("\t|-Acknowledge Number : %u\n", ntohl(tcp->ack_seq));
-	printf("\t|-Header Length     : %d DWORDS or %d BYTES\n", (unsigned int)tcp->doff, (unsigned int)tcp->doff*4);
-	printf("\t|----------Flags-----------\n");
-	printf("\t\t|-Urgent Flag        : %d\n", (unsigned int)tcp->urg);
-	printf("\t\t|-Acknowledgement Flag : %d\n", (unsigned int)tcp->ack);
-	printf("\t\t|-Push Flag           : %d\n", (unsigned int)tcp->psh);
-	printf("\t\t|-Reset Flag          : %d\n", (unsigned int)tcp->rst);
-	printf("\t\t|-Synchronise Flag    : %d\n", (unsigned int)tcp->syn);
-	printf("\t\t|-Finish Flag         : %d\n", (unsigned int)tcp->fin);
-	printf("\t|-Window size        : %d\n", ntohs(tcp->window));
-	printf("\t|-Checksum           : %d\n", ntohs(tcp->check));
-	printf("\t|-Urgent Pointer     : %d\n", tcp->urg_ptr);
+    printf("--------------------------------------------------\n");
+    printf("🔸 Flags 🔸\n");
+    printf("   🟢 URG : %d\n", (unsigned int)tcp->urg);
+    printf("   🟢 ACK : %d\n", (unsigned int)tcp->ack);
+    printf("   🟢 PSH : %d\n", (unsigned int)tcp->psh);
+    printf("   🟢 RST : %d\n", (unsigned int)tcp->rst);
+    printf("   🟢 SYN : %d\n", (unsigned int)tcp->syn);
+    printf("   🟢 FIN : %d\n", (unsigned int)tcp->fin);
+
+    printf("--------------------------------------------------\n");
+    printf("🔹 Window Size        : %d\n", ntohs(tcp->window));
+    printf("🔹 Checksum           : 0x%04X\n", ntohs(tcp->check));
+    printf("🔹 Urgent Pointer     : %d\n", ntohs(tcp->urg_ptr));
+    printf("--------------------------------------------------\n");
+    printf("🌟 End of TCP Header Information 🌟\n");
 }
-
 void display_tcp_packet_thumbnail(struct ethhdr *eth, struct iphdr *ip, struct tcphdr *tcp,  struct sockaddr_in source, struct sockaddr_in dest)  {
 	printf("\n#####DISPLAYING TCP PACKET THUMBNAIL#####");
 	source.sin_addr.s_addr = ip->saddr;	
@@ -170,16 +193,24 @@ void display_tcp_payload (unsigned char *data, int remaining_data, int srcport, 
 			printf("\n");
 		printf(" %.2X ", data[i]);
 	}
+	printf("\n---------------------------------------------------\n\n");
 }
 
-void display_udp_header(struct udphdr *udp) {	
-	printf("\n-------UDP HEADER--------------\n");
-	printf("\t|-Source Port : %d\n", ntohs(udp->source));
-	printf("\t|-Destination Port : %d\n", ntohs(udp->dest));
-	printf("\t|-UDP Length : %d\n", ntohs(udp->len));
-	printf("\t|-UDP Checksum : %d\n", ntohs(udp->check));
-}
+void display_udp_header(struct udphdr *udp) {
+    printf("\n🟡🟡🟡🟡🟡🟡🟡🟡🟡🟡🟡🟡🟡🟡🟡🟡🟡🟡🟡🟡🟡🟡🟡🟡\n");
 
+    // Display the UDP header information
+    printf("\n🌊 UDP Header 🌊\n");
+    printf("============================================\n");
+    printf("🔹 Source Port      : %d\n", ntohs(udp->source));
+    printf("🔹 Destination Port : %d\n", ntohs(udp->dest));
+    printf("🔹 Length           : %d\n", ntohs(udp->len));
+    printf("🔹 Checksum         : 0x%04X\n", ntohs(udp->check));
+    printf("============================================\n");
+
+    // End delimiter for the current packet
+    printf("🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢\n");
+}
 
 void display_udp_payload (unsigned char *data, int remaining_data ) {
 
@@ -188,8 +219,8 @@ void display_udp_payload (unsigned char *data, int remaining_data ) {
 		if (i != 0 && i % 16 == 0)
 			printf("\n");
     printf(" %.2X ", data[i]);
-	
 	}
+	printf("\n---------------------------------------------------\n\n");
 }
 
 void packet_capture(const char *interface, int len, int command, struct ip_filter *myfilterptr) {
@@ -317,7 +348,6 @@ while(1) { // infinite loop
 		if(ip->protocol == 17) {
 				display_ethernet_header(eth);
 				display_ip_packet(ip, source, dest);
-				printf("\n*******************Displayig UDP headers*****************************************\n");
 				struct udphdr *udp=(struct udphdr*)(buffer + iphdrlen + sizeof(struct ethhdr));	
 				data = (buffer + iphdrlen + sizeof(struct ethhdr) + sizeof(struct udphdr));
 				remaining_data = buflen - (iphdrlen + sizeof(struct ethhdr) + sizeof(struct udphdr));
@@ -345,7 +375,6 @@ while(1) { // infinite loop
 		if(ip->protocol == 17) {
 				display_ethernet_header(eth);
 				display_ip_packet(ip, source, dest);
-				printf("\n*******************Displayig UDP headers*****************************************\n");
 				struct udphdr *udp=(struct udphdr*)(buffer + iphdrlen + sizeof(struct ethhdr));	
 				data = (buffer + iphdrlen + sizeof(struct ethhdr) + sizeof(struct udphdr));
 				remaining_data = buflen - (iphdrlen + sizeof(struct ethhdr) + sizeof(struct udphdr));
@@ -371,7 +400,6 @@ while(1) { // infinite loop
 			else if(ip->protocol == 17) {
 				display_ethernet_header(eth);
 				display_ip_packet(ip, source, dest);
-				printf("\n*******************Displayig UDP headers*****************************************\n");
 				struct udphdr *udp=(struct udphdr*)(buffer + iphdrlen + sizeof(struct ethhdr));	
 				data = (buffer + iphdrlen + sizeof(struct ethhdr) + sizeof(struct udphdr));
 				remaining_data = buflen - (iphdrlen + sizeof(struct ethhdr) + sizeof(struct udphdr));
@@ -404,7 +432,6 @@ while(1) { // infinite loop
 				if(ip->protocol == 17) {
 					display_ethernet_header(eth);
 					display_ip_packet(ip, source, dest);
-					printf("\n*******************Displayig UDP headers*****************************************\n");
 					struct udphdr *udp=(struct udphdr*)(buffer + iphdrlen + sizeof(struct ethhdr));	
 					data = (buffer + iphdrlen + sizeof(struct ethhdr) + sizeof(struct udphdr));
 					remaining_data = buflen - (iphdrlen + sizeof(struct ethhdr) + sizeof(struct udphdr));
