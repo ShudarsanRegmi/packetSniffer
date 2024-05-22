@@ -11,7 +11,7 @@
 #include <netinet/udp.h>
 #include <netinet/in.h>
 #include <net/if.h>
-
+#include <regex.h>
 
 #define BUFFSIZE 65536
 #define MAX_IP_LENGTH 45 // Maximum length of IPv6 address is 45 characters
@@ -50,6 +50,44 @@ void get_interface_ip(struct sockaddr_in *localipptr, const char *interface) {
 	memcpy(localipptr, &ifr.ifr_addr, sizeof(struct sockaddr_in));
 }
 
+int validateIPAddress(char *ip_address) {
+    regex_t ipv4_regex, ipv6_regex;
+    int ret;
+
+    // Regular expressions for IPv4 and IPv6 addresses
+    ret = regcomp(&ipv4_regex, "^([0-9]{1,3}\\.){3}[0-9]{1,3}$", REG_EXTENDED); 
+    if (ret != 0) {
+        printf("Failed to compile IPv4 regex\n");
+        return -1;
+    }
+
+    ret = regcomp(&ipv6_regex, "^[0-9a-fA-F:]+$", REG_EXTENDED);
+    if (ret != 0) {
+        printf("Failed to compile IPv6 regex\n");
+        regfree(&ipv4_regex);
+        return -1;
+    }
+
+    // Matching the input IP address with both IPv4 and IPv6 regex
+    ret = regexec(&ipv4_regex, ip_address, 0, NULL, 0);
+    if (ret == 0) {
+        regfree(&ipv4_regex);
+        regfree(&ipv6_regex);
+        return 4; // IPv4 address
+    }
+
+    ret = regexec(&ipv6_regex, ip_address, 0, NULL, 0);
+    if (ret == 0) {
+        regfree(&ipv4_regex);
+        regfree(&ipv6_regex);
+        return 6; // IPv6 address
+    }
+
+    // Neither IPv4 nor IPv6
+    regfree(&ipv4_regex);
+    regfree(&ipv6_regex);
+    return 0;
+}
 // function to display ethernet header
 void display_ethernet_header(struct ethhdr *eth) {
 	printf("\n-------ETHERNET HEADER--------------\n");
@@ -631,6 +669,8 @@ int main() {
 	printf("4) Display TCP Packet Details\n");
 	printf("5) Display UDP Packet Details\n");
 	printf("6) Display All Packet Details\n");
+	printf("7) Display Packets to IP\n");
+	printf("8) Display Packets from IP\n");
 
 	printf("Choose one of the options below: ");
 	scanf("%d",&command);
@@ -646,10 +686,45 @@ int main() {
 	strcpy(to_filter_ip, "0.0.0.0");
 	myfilterptr->use_status = 0;
 
+	if(command == 8) {
+		myfilterptr->use_status = 1;
+		printf("Enter the source ip: ");
+		getchar();
+		scanf("%45s", from_filter_ip); // Read up to 45 characters (maximum for IPv6)
+
+		// perform ip validation
+		int version = validateIPAddress(from_filter_ip);
+		if(version == 4 || version == 6) {
+			printf("IP validated...\n");
+			printf("From Filter IP = %s",from_filter_ip);
+			printf("Here...");
+		}else{
+			printf("Invalid ip");
+			return 0;
+		}
+
+	}
+
+	if(command == 7) {
+		myfilterptr->use_status = 2;
+		printf("Enter the destination ip: ");
+		getchar();
+		scanf("%45s", to_filter_ip); // Read up to 45 characters (maximum for IPv6)
+
+		// perform ip validation
+		int version = validateIPAddress(to_filter_ip);
+		if(version == 4 || version == 6) {
+			printf("IP validated...\n");
+			printf("To Filter IP = %s",to_filter_ip);
+			printf("Here...");
+		}else{
+			printf("Invalid ip");
+			return 0;
+		}
+	}
 
 	struct sockaddr_in from_filter_addr;
 	struct sockaddr_in to_filter_addr;
-
 
 	inet_pton(AF_INET,from_filter_ip, &from_filter_addr.sin_addr);
 	inet_pton(AF_INET, to_filter_ip, &to_filter_addr.sin_addr);
