@@ -30,3 +30,23 @@ Run the code
 ```bash
 ./packetSniffer
 ```
+
+## Screenshots
+
+### Displaying TCP packet thumbnail
+
+![TCP Packet Thumbnail](./images/tcp_packet_thumbnail.png)
+
+### Displaying UDP Packet Thumbnail![UDP Packet Thumbnail](./images/udp_packet_thumbnail.png)
+
+### Displaying Other Packet Thumbnail
+
+![Other Packet Thumbnail](./images/other_packet_thumbnail.png) 
+
+### Displaying TCP Packet Details 
+
+![TCP Packet Thumbnail](./images/tcp_packet_details.png) 
+
+### Displaying UDP Packet Details
+
+![UDP Packet Details](./images/udp_packet_details.png) 
