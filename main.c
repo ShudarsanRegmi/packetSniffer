@@ -116,8 +116,7 @@ void display_ip_packet(struct iphdr *ip,struct sockaddr_in source, struct sockad
 
 
 void display_tcp_header (struct tcphdr *tcp) {	
-	printf("********************HERE WE GO-------------------------------\n");
-	printf("\nTCP Header\n");
+	printf("\n----------TCP Header-----------\n");
 	printf("\t|-Source Port        : %u\n", ntohs(tcp->source));
 	printf("\t|-Destination Port   : %u\n", ntohs(tcp->dest));
 	printf("\t|-Sequence Number   : %u\n", ntohl(tcp->seq));
@@ -165,7 +164,6 @@ void display_other_packets_thumbnail(struct ethhdr *eth, struct iphdr *ip, struc
 
 }
 void display_tcp_payload (unsigned char *data, int remaining_data, int srcport, int dstport) {
-	printf("TCP port = %d\n",srcport);
 	printf("\n-------TCP PAYLOAD--------------\n");
 	for(int i=0;i<remaining_data;i++) {
 		if (i != 0 && i % 16 == 0)
@@ -248,13 +246,7 @@ while(1) { // infinite loop
 	unsigned short iphdrlen;
 	struct iphdr *ip = (struct iphdr*)(buffer + sizeof(struct ethhdr)); // separting ip information from buffer
 	unsigned int *ip_bytes = (unsigned int *)malloc(10*sizeof(unsigned int));
-	/* ip_bytes = (unsigned int *)buffer + sizeof(struct ethhdr); */
 
-
-	/* for(int i = 0; i< 20; i++) { */
-	/* 	printf("%.2X ", *(ip_bytes+i)); */
-	/* } */
-	/* exit(0); */
 
 	iphdrlen = ip->ihl*4; //IHL means Internet Header Length (IHL), which is the number of 32-bit words in the header. So we have to multiply the IHL by 4 to get the size of the header in bytes:
 	/* getting pointer to udp header*/
@@ -265,16 +257,12 @@ while(1) { // infinite loop
 	source.sin_addr.s_addr = ip->saddr;
 	dest.sin_addr.s_addr = ip->daddr;
 
-	/* printf("use Status = %d\n", myfilterptr->use_status); */
-	/* printf("\t|-Source IP : %s\n", inet_ntoa(myfilterptr->source_filter.sin_addr)); */
-	/* printf("\t|-Destination IP : %s\n", inet_ntoa(myfilterptr->dest_filter.sin_addr)); */
 
 	if (myfilterptr->use_status == 2 && (ip->daddr != myfilterptr->dest_filter.sin_addr.s_addr) ||
 		myfilterptr->use_status == 1 && (ip->saddr != myfilterptr->source_filter.sin_addr.s_addr))	 { 
 		// if source/destination filter is set but the current packet doesn't doesn't math
 		// no need to go through each case below
 		/* printf("IP filter was set, but the packet doesn't match the used filter\n"); */
-		/* exit(0); */
 	}else{
 	// if source filter is set and ip packet does not match the desitnation filter
 	switch(command) {
@@ -319,13 +307,10 @@ while(1) { // infinite loop
 		if(ip->protocol == 6) {
 			display_ethernet_header(eth);
 			display_ip_packet(ip, source, dest);
-			printf("\n*******************Displaying TCP headers*****************************************\n");
 			struct tcphdr *tcp= (struct tcphdr*)(buffer + iphdrlen + sizeof(struct ethhdr));	
 			display_tcp_header(tcp);
 			data = (buffer + iphdrlen + sizeof(struct ethhdr) + sizeof(struct tcphdr));
 			remaining_data = buflen - (iphdrlen + sizeof(struct ethhdr) + sizeof(struct tcphdr));
-			printf("remaining data = %d\n", remaining_data);
-			printf("data = %p\n",data);
 			display_tcp_payload(data, remaining_data, ntohs(tcp->source), ntohs(tcp->dest));
 		}
 
@@ -347,13 +332,10 @@ while(1) { // infinite loop
 			if(ip->protocol == 6) {
 				display_ethernet_header(eth);
 				display_ip_packet(ip, source, dest);
-				printf("\n*******************Displaying tcp headers*****************************************\n");
 				struct tcphdr *tcp= (struct tcphdr*)(buffer + iphdrlen + sizeof(struct ethhdr));	
 				display_tcp_header(tcp);
 				data = (buffer + iphdrlen + sizeof(struct ethhdr) + sizeof(struct tcphdr));
 				remaining_data = buflen - (iphdrlen + sizeof(struct ethhdr) + sizeof(struct tcphdr));
-				printf("remaining data = %d\n", remaining_data);
-				printf("data = %p\n",data);
 				display_tcp_payload(data, remaining_data, ntohs(tcp->source), ntohs(tcp->dest));
 			}
 		break;
@@ -380,13 +362,10 @@ while(1) { // infinite loop
 			if(ip->protocol == 6) {
 				display_ethernet_header(eth);
 				display_ip_packet(ip, source, dest);
-				printf("\n*******************Displaying tcp headers*****************************************\n");
 				struct tcphdr *tcp= (struct tcphdr*)(buffer + iphdrlen + sizeof(struct ethhdr));	
 				display_tcp_header(tcp);
 				data = (buffer + iphdrlen + sizeof(struct ethhdr) + sizeof(struct tcphdr));
 				remaining_data = buflen - (iphdrlen + sizeof(struct ethhdr) + sizeof(struct tcphdr));
-				printf("remaining data = %d\n", remaining_data);
-				printf("data = %p\n",data);
 				display_tcp_payload(data, remaining_data, ntohs(tcp->source), ntohs(tcp->dest));
 			}
 			else if(ip->protocol == 17) {
@@ -407,32 +386,15 @@ while(1) { // infinite loop
 
 		 /* 7)	display_packets_to_ip */
 		case 7: 
-		// bring the prameterized ip and the captured ip in same format and compare	
-		/* printf("__________HERE___________________\n"); */
-
 
 		source.sin_addr.s_addr = ip->daddr;
-		/* printf("destination IP = %s\n", inet_ntoa(source.sin_addr)); */
-
 		dest.sin_addr.s_addr = ip->saddr;
-		/* printf("destination IP = %s\n", inet_ntoa(dest.sin_addr)); */
-
-
 		// Using destination filter
 		if (myfilterptr->use_status == 2) {
-			/* printf("Filter IP = %s\n", inet_ntoa(myfilterptr->dest_filter.sin_addr)); */
-
-			/* printf("BInary IP = %d\n",ip->saddr); */
-			/* printf("BInary IP2 = %d\n",myfilterptr->dest_filter.sin_addr.s_addr); */
-
 			if(ip->daddr == myfilterptr->dest_filter.sin_addr.s_addr) {
-				printf("MATCHED################################################33\n");
-
-
 				if(ip->protocol == 6) {
 					display_ethernet_header(eth);
 					display_ip_packet(ip, source, dest);
-					printf("\n*******************Displaying tcp headers*****************************************\n");
 					struct tcphdr *tcp= (struct tcphdr*)(buffer + iphdrlen + sizeof(struct ethhdr));	
 					display_tcp_header(tcp);
 					data = (buffer + iphdrlen + sizeof(struct ethhdr) + sizeof(struct tcphdr));
@@ -465,19 +427,10 @@ while(1) { // infinite loop
 		// Using source filter
 		/* printf("CASE 8"); */
 		if (myfilterptr->use_status == 1) {
-			/* printf("Filter IP = %s\n", inet_ntoa(myfilterptr->dest_filter.sin_addr)); */
-
-			/* printf("BInary IP = %d\n",ip->saddr); */
-			/* printf("BInary IP2 = %d\n",myfilterptr->dest_filter.sin_addr.s_addr); */
-			/* printf("Using destinatin filter..\n"); */
 			if(ip->saddr == myfilterptr->source_filter.sin_addr.s_addr) {
-				printf("MATCHED SOURCE ADDREESS ################################################33\n");
-
-
 				if(ip->protocol == 6) {
 					display_ethernet_header(eth);
 					display_ip_packet(ip, source, dest);
-					printf("\n*******************Displaying tcp headers*****************************************\n");
 					struct tcphdr *tcp= (struct tcphdr*)(buffer + iphdrlen + sizeof(struct ethhdr));	
 					display_tcp_header(tcp);
 					data = (buffer + iphdrlen + sizeof(struct ethhdr) + sizeof(struct tcphdr));
@@ -487,7 +440,6 @@ while(1) { // infinite loop
 				if(ip->protocol == 17) {
 					display_ethernet_header(eth);
 					display_ip_packet(ip, source, dest);
-					printf("\n*******************Displayig UDP headers*****************************************\n");
 					struct udphdr *udp=(struct udphdr*)(buffer + iphdrlen + sizeof(struct ethhdr));	
 					data = (buffer + iphdrlen + sizeof(struct ethhdr) + sizeof(struct udphdr));
 					remaining_data = buflen - (iphdrlen + sizeof(struct ethhdr) + sizeof(struct udphdr));
@@ -495,145 +447,11 @@ while(1) { // infinite loop
 					display_udp_payload(data, remaining_data);
 
 				}
-				// here display all the tcp and udp packets that is going to the parameterized ip
 				
 			}
 
 				
 		}
-		break;
-		// Monitor my application	
-		case 9:
-
-		source.sin_addr.s_addr = ip->daddr;
-		/* printf("destination IP = %s\n", inet_ntoa(source.sin_addr)); */
-
-		dest.sin_addr.s_addr = ip->saddr;
-		/* printf("destination IP = %s\n", inet_ntoa(dest.sin_addr)); */
-
-		/* printf("Monitoring your application\n"); */
-		if( ip->protocol == 6 ) {
-		printf("Caputred tcp packets\n");
-			struct tcphdr *tcp= (struct tcphdr*)(buffer + iphdrlen + sizeof(struct ethhdr));	
-			printf("Source = %d\n",ntohs(tcp->source));
-			printf("Destination= %d\n",ntohs(tcp->dest));
-			if(tcp->dest == htons(5173) || tcp->source == htons(5713)) {
-				// only external traffic will be able to come here...
-				// I can keep this in logfile
-				printf("Private Resource accessed from outside..\n");	
-				/* printf("\t|-Source Port        : %u\n", ntohs(tcp->source)); */
-				/* printf("\t|-Destination Port   : %u\n", ntohs(tcp->dest)); */
-				/* printf("\t| Source Address = %s",inet_ntoa(source.sin_addr)); */
-				/* printf("\t| Destination Address = %s",inet_ntoa(dest.sin_addr)); */
-				printf("%s\n",inet_ntoa(source.sin_addr));
-			}
-		}
-		break;
-
-		case 10:
-		// identify the http, ftp and telnet traffic
-		/* printf("Inside case 10\n"); */
-		if(ip->protocol == 6) {
-				struct tcphdr *tcp= (struct tcphdr*)(buffer + iphdrlen + sizeof(struct ethhdr));
-				data = (buffer + iphdrlen + sizeof(struct ethhdr) + sizeof(struct tcphdr));
-			/* printf("Port = %d",ntohs(tcp->dest)); / */
-		}
-		if(ip->protocol == 6) {
-			/* display_ethernet_header(eth); */
-			/* display_ip_packet(ip, source, dest); */
-			/* printf("\n*******************Displaying tcp headers*****************************************\n"); */
-			struct tcphdr *tcp= (struct tcphdr*)(buffer + iphdrlen + sizeof(struct ethhdr));	
-			/* display_tcp_header(tcp); */
-
-
-			data = (buffer + iphdrlen + sizeof(struct ethhdr) + sizeof(struct tcphdr));
-			remaining_data = buflen - (iphdrlen + sizeof(struct ethhdr) + sizeof(struct tcphdr));
-
-			printf("RRRRRRRemaining data = %d\n", remaining_data);
-			printf("data = %p\n",data);
-			display_tcp_payload(data, remaining_data, ntohs(tcp->source), ntohs(tcp->dest));
-
-
-			printf("--------------------------------------\n");
-			int offset = 12;	
-			/* printf("data  = %.2X\n",data[offset+0]); */	
-			/* printf("data  = %.2X\n",data[offset+1]); */	
-			/* printf("data  = %.2X\n",data[offset+2]); */	
-
-			/* printf("data  = %c\n",data[offset+0]); */	
-			/* printf("data  = %c\n",data[offset+1]); */	
-			/* printf("data  = %c\n",data[offset+2]); */	
-			
-			// we'v hex values in 'data' variable which is an array.
-			// so we'll check the first few bytes of that data variable and match with http, then we can identify the packet as http
-			// GET POST PUT UPDATE PATCH DELETE OPTIONS HEAD
-			//
-			//
-			// DUNNO WHY AM I GETTING HTTP TRAFFIC AT OFFSET 12
-			//checking for get 47 45 54
-			//
-			int http = 0;
-			int ftp = 0;
-
-
-			 if (data[offset + 0] == 0x47 && data[offset + 1] == 0x45 && data[offset + 2] == 0x54) {
-				printf("This is a GET request\n");
-				http = 1;
-			} else if (data[offset + 0] == 0x50 && data[offset + 1] == 0x4f && data[offset + 2] == 0x53 && data[offset + 3] == 0x54) {
-				printf("This is a POST request\n");
-				http = 1;
-			} else if (data[offset + 0] == 0x50 && data[offset + 1] == 0x55 && data[offset + 2] == 0x54) {
-				printf("This is a PUT request\n");
-				http = 1;
-			} else if (data[offset + 0] == 0x50 && data[offset + 1] == 0x41 && data[offset + 2] == 0x54 && data[offset + 3] == 0x43 && data[offset + 4] == 0x48) {
-				printf("This is a PATCH request\n");
-				http = 1;
-			} else if (data[offset + 0] == 0x44 && data[offset + 1] == 0x45 && data[offset + 2] == 0x4c && data[offset + 3] == 0x45 && data[offset + 4] == 0x54 && data[offset + 5] == 0x45) {
-				printf("This is a DELETE request\n");
-				http = 1;
-			} else if (data[offset + 0] == 0x4f && data[offset + 1] == 0x50 && data[offset + 2] == 0x54 && data[offset + 3] == 0x49 && data[offset + 4] == 0x4f && data[offset + 5] == 0x4e && data[offset + 6] == 0x53) {
-				printf("This is an OPTIONS request\n");
-				http = 1;
-			} else if (data[offset + 0] == 0x48 && data[offset + 1] == 0x54 && data[offset + 2] == 0x54 && data[offset + 3] == 0x50) {
-				printf("This is HTTP response\n");
-				http = 1;
-			}else{
-				// do nothing
-			}
-		// implentaion for ftp 
-
-		if (http == 1) {
-			// Log the insecure connection
-			struct sockaddr_in source, dest;
-			source.sin_addr.s_addr = ip->saddr;	
-			dest.sin_addr.s_addr = ip->daddr;
-
-			/* for (int i = 0; i< 20; i++) { */
-			/* 	printf("%.2X ", *(ip+i)); */
-			/* } */
-			printf("\t|-Source IP : %s\n", inet_ntoa(source.sin_addr));
-			printf("\t|-Destination IP : %s\n", inet_ntoa(dest.sin_addr));
-			printf("\t|-Version: %d\n", (unsigned int)ip->version);
-			printf("\t|-Internet Header Length : %d DWORDS or %d Bytes\n", (unsigned int)ip->ihl, ((unsigned int)(ip->ihl)) * 4);
-			printf("\t|-Type of Service: %d\n", (unsigned int)ip->tos);
-			printf("\t|-Total Length: %d\n", (unsigned int)ip->tos);
-			printf("----------------------------------------------------\n");
-			printf("\t|-Source Port        : %u\n", ntohs(tcp->source));
-			printf("\t|-Destination Port   : %u\n", ntohs(tcp->dest));
-			printf("\t|-Sequence Number   : %u\n", ntohl(tcp->seq));
-			printf("\t|-Acknowledge Number : %u\n", ntohl(tcp->ack_seq));
-			exit(0);
-				
-		}
-
-		if (ftp == 1) {
-			printf("FTP PROTOCOL DETECTED\n\n");
-		}
-			
-
-		}
-		
-
 		break;
 
 
@@ -697,7 +515,6 @@ int main() {
 		if(version == 4 || version == 6) {
 			printf("IP validated...\n");
 			printf("From Filter IP = %s",from_filter_ip);
-			printf("Here...");
 		}else{
 			printf("Invalid ip");
 			return 0;
@@ -716,7 +533,6 @@ int main() {
 		if(version == 4 || version == 6) {
 			printf("IP validated...\n");
 			printf("To Filter IP = %s",to_filter_ip);
-			printf("Here...");
 		}else{
 			printf("Invalid ip");
 			return 0;
