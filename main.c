@@ -158,30 +158,27 @@ void display_tcp_header(struct tcphdr *tcp) {
     printf("🌟 End of TCP Header Information 🌟\n");
 }
 void display_tcp_packet_thumbnail(struct ethhdr *eth, struct iphdr *ip, struct tcphdr *tcp,  struct sockaddr_in source, struct sockaddr_in dest)  {
-	printf("\n#####DISPLAYING TCP PACKET THUMBNAIL#####");
 	source.sin_addr.s_addr = ip->saddr;	
 	dest.sin_addr.s_addr = ip->daddr;	
 	// for low level protocols which is not using ip it will show 0
-	printf("\n [[ TCP Packet :: ipv%d Source: %s :: ", (unsigned int)ip->version, inet_ntoa(source.sin_addr));
-	printf("Dest: %s ]]",inet_ntoa(dest.sin_addr));
+	printf("\n [[ 🌐🌐TCP Packet :: ipv%d Source: %s :: ", (unsigned int)ip->version, inet_ntoa(source.sin_addr));
+	printf("Dest: %s Source Port: %u Dest Port: %u]]",inet_ntoa(dest.sin_addr),ntohs(tcp->source), ntohs(tcp->dest));
 	/* printf("\n[[ TCP Packet :: ipv%d :: Source: %s :: Dest: %s ]]\n", (unsigned int)ip->version, inet_ntoa(source.sin_addr), inet_ntoa(dest.sin_addr)); */
 }
 
 void display_udp_packet_thumbnail(struct ethhdr *eth, struct iphdr *ip, struct udphdr *udp, struct sockaddr_in source, struct sockaddr_in dest) {
-	printf("\n#####DISPLAYING UDP PACKET THUMBNAIL#####");
 	source.sin_addr.s_addr = ip->saddr;	
 	dest.sin_addr.s_addr = ip->daddr;	
 	// for low level protocols which is not using ip it will show 0
-	printf("\n [[ UDP  Packet :: ipv%d Source: %s :: ", (unsigned int)ip->version, inet_ntoa(source.sin_addr));
-	printf("Dest: %s ]]",inet_ntoa(dest.sin_addr));
+	printf("\n [[📡📡 UDP  Packet :: ipv%d Source: %s :: ", (unsigned int)ip->version, inet_ntoa(source.sin_addr));
+	printf("Dest: %s Source Port: %u Dest Port: %u]]",inet_ntoa(dest.sin_addr), ntohs(udp->source), ntohs(udp->dest));
 }
 
 void display_other_packets_thumbnail(struct ethhdr *eth, struct iphdr *ip, struct sockaddr_in source, struct sockaddr_in dest) {
-	printf("\n#####DISPLAYING OTHER PACKET THUMBNAIL#####");
 	source.sin_addr.s_addr = ip->saddr;	
 	dest.sin_addr.s_addr = ip->daddr;	
 	// for low level protocols which is not using ip it will show 0
-	printf("\n [[ OTHER Packet :: ipv%d Source: %s :: ", (unsigned int)ip->version, inet_ntoa(source.sin_addr));
+	printf("\n [[ 🛰️🛰️ OTHER Packet :: ipv%d Source: %s :: ", (unsigned int)ip->version, inet_ntoa(source.sin_addr));
 	printf("Dest: %s ]]",inet_ntoa(dest.sin_addr));
 	/* printf("\n[[ TCP Packet :: ipv%d :: Source: %s :: Dest: %s ]]\n", (unsigned int)ip->version, inet_ntoa(source.sin_addr), inet_ntoa(dest.sin_addr)); */
 
